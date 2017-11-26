@@ -5,7 +5,7 @@ var myArgs = process.argv.slice(2);
 // password should be passed in single quotes to protect special characters
 // like: $ node hashpass.js 'my-p4$$w0rd'
 var pass_to_hash = myArgs[0];
-console.log(pass_to_hash);
+//console.log(pass_to_hash);
 
 
 // Load the bcrypt module

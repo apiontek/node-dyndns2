@@ -3,35 +3,42 @@ var http = require('http');
 var url = require('url');
 var auth = require('basic-auth');
 var bcrypt = require('bcrypt');
+var m = require('moment');
 
+// check if we've received a zonefile location that exists, and is a directory)
 if (!process.env.DYNDNS_ZONEFILE_LOCATION) {
-    console.log("ERROR: No dns zonefile location given.\n" +
-                "Please provide DYNDNS_ZONEFILE_LOCATION environment variable.\n");
+    console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " ERROR: No dns zonefile location given. Please provide DYNDNS_ZONEFILE_LOCATION environment variable.\n");
     process.exit(1);
 } else {
     var zonefile_location = process.env.DYNDNS_ZONEFILE_LOCATION;
     fs.stat(zonefile_location, function (err, stats){
         if (err) {
             // Directory doesn't exist or something.
-            console.log('ERROR: ' + zonefile_location + ' does not exist.');
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' ERROR: ' + zonefile_location + ' does not exist.');
             process.exit(1);
         }
         if (!stats.isDirectory()) {
             // This isn't a directory!
-            console.log('ERROR: ' + zonefile_location + ' is not a directory.');
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' ERROR: ' + zonefile_location + ' is not a directory.');
             process.exit(1);
         }
     });
 }
 
-// import the dyndns logic
-var dyndns2 = require('./dyndns2');
-
 // AUTHENTICATION
 // keeping it simple -- single user, one auth token, stored as bcrypt hash
 // generated with hashpass.js like: `node hashpass.js 'my-p4$$w0rd'`
 // No username -- treat the password like a token like duckdns.org does.
-var token_hash = '$2a$10$4.Gk9owJXxLUqWpQrXGYkuSidjHHhlZHO3wfEPlx0e2/O1JtlnIhG';
+
+// check if we've received an auth token hash to check against
+if (!process.env.DYNDNS_AUTH_TOKEN_BCRYPT_HASH) {
+    console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " ERROR: No auth token hash provided. Please set DYNDNS_AUTH_TOKEN_BCRYPT_HASH to a bcrypt hash of your auth password/token.")
+} else {
+    var token_hash = proces.env.DYNDNS_AUTH_TOKEN_BCRYPT_HASH;
+}
+
+// import the dyndns logic
+var dyndns2 = require('./dyndns2');
 
 // VALID API PATHS
 var valid_paths = ["/nic/update","/v3/update","/nic/delete","/v3/delete"];

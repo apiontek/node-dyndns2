@@ -157,7 +157,11 @@ function process_domain(dyndns2_obj, domain) {
                 var record = {};
                 record.name = host;
                 record.ip = dyndns2_obj.myip;
-                record.ttl = process.env.DYNDNS_DEFAULT_DYN_TTL;
+                if (!process.env.DYNDNS_DEFAULT_DYN_TTL) {
+                    record.ttl = "300";
+                } else {
+                    record.ttl = process.env.DYNDNS_DEFAULT_DYN_TTL;
+                }
                 zone_obj[record_type].push(record);
                 change = true;
                 console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Record not found. Added record: " + JSON.stringify(record));
