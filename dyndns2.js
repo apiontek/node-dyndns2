@@ -90,6 +90,26 @@ exports.handle = function(req, res) {
         }
     }
 
+    // now if we have a "good" result we should do
+    //    nsd-control reload <domain> && nsd-control notify <domain>
+    // http://nodejs.org/api.html#_child_processes
+        var exec = require('child_process').exec;
+        exec('nsd-control reload', function(error, stdout, stderr) {
+            console.log('nsd-control reload stdout: ' + stdout);
+            console.log('nsd-control reload stderr: ' + stderr);
+            if (error !== null) {
+                console.log('nsd-control reload exec error: ' + error);
+            }
+        });
+        exec('nsd-control notify', function(error, stdout, stderr) {
+            console.log('nsd-control reload stdout: ' + stdout);
+            console.log('nsd-control reload stderr: ' + stderr);
+            if (error !== null) {
+                console.log('nsd-control reload exec error: ' + error);
+            }
+        });
+
+
     console.log(result);
     res.end(result);
 }
