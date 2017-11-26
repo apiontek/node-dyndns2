@@ -1,6 +1,7 @@
 var url = require('url');
 var fs = require('fs');
 var zonefile = require('dns-zonefile');
+var m = require('moment');
 
 /*
   According to https://help.dyn.com/remote-access-api/perform-update/
@@ -22,11 +23,11 @@ var zonefile = require('dns-zonefile');
 exports.handle = function(req, res) {
     // record query from url
     var url_query = url.parse(req.url, true).query;
-    console.log("\nurl_query: " + JSON.stringify(url_query));
+    // console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " \nurl_query: " + JSON.stringify(url_query));
     
     // check query is valid; no need to continue if it's bad
     if (!url_query.hostname || !url_query.myip) {
-        console.log("Missing hostname or ip address in query.");
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Missing hostname or ip address in query.");
         res.end("bad");
         return false;
     }
@@ -34,7 +35,7 @@ exports.handle = function(req, res) {
     // validate provided IP address
     var ip_expression = /((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))/;
     if (!ip_expression.test(url_query.myip)) {
-        console.log("Bad IP address in query.");
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Bad IP address in query.");
         res.end("bad");
         return false;
     } 
@@ -45,15 +46,15 @@ exports.handle = function(req, res) {
     // get hosts to update
     // while we're at it, can we check the zone files too?
     get_hosts_to_update(dyndns2_obj, req, res);
-    console.log("\ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " \ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
 
     // record myip
     dyndns2_obj.myip = url_query.myip;
-    console.log("\ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " \ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
 
     // determine action_to_take: update or delete
     get_action_to_take(dyndns2_obj, req, res);
-    console.log("\ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " \ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
 
     // TODO
     //  we need to determine if files exist for each domain in query
@@ -62,10 +63,10 @@ exports.handle = function(req, res) {
     //  AND we can use this opportunity to save the zone filenames
     //  in the dyndns2_obj so we don't have to get them again
     var missing_domain_zonefiles = get_all_zonefiles(dyndns2_obj);
-    console.log("\ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
-    console.log("\n");
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " \ndyndns2_obj: " + JSON.stringify(dyndns2_obj));
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " \n");
     if (missing_domain_zonefiles.length > 0) {
-        console.log("Zone file does not exist for domain(s):" + missing_domain_zonefiles);
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Zone file does not exist for domain(s):" + missing_domain_zonefiles);
         res.end("bad");
         return false;
     }
@@ -82,9 +83,8 @@ exports.handle = function(req, res) {
     for (var domain in dyndns2_obj.hosts_to_update) {
         if (dyndns2_obj.hosts_to_update.hasOwnProperty(domain)) {
             var new_result = process_domain(dyndns2_obj, domain);
-            if (new_result == "bad") {
-                result = new_result;
-            } else if (new_result == "good" && result == "nochg") {
+            // If we're doing multiple domains and any of them return good, keep that result:
+            if (new_result == "good") {
                 result = new_result;
             }
         }
@@ -93,22 +93,23 @@ exports.handle = function(req, res) {
     // now if we have a "good" result we should do
     //    nsd-control reload <domain> && nsd-control notify <domain>
     // http://nodejs.org/api.html#_child_processes
+    if (result == "good") {
         var exec = require('child_process').exec;
         exec('nsd-control reload', function(error, stdout, stderr) {
-            console.log('nsd-control reload stdout: ' + stdout);
-            console.log('nsd-control reload stderr: ' + stderr);
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' nsd-control reload stdout: ' + stdout);
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' nsd-control reload stderr: ' + stderr);
             if (error !== null) {
-                console.log('nsd-control reload exec error: ' + error);
+                console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' nsd-control reload exec error: ' + error);
             }
         });
         exec('nsd-control notify', function(error, stdout, stderr) {
-            console.log('nsd-control reload stdout: ' + stdout);
-            console.log('nsd-control reload stderr: ' + stderr);
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' nsd-control reload stdout: ' + stdout);
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' nsd-control reload stderr: ' + stderr);
             if (error !== null) {
-                console.log('nsd-control reload exec error: ' + error);
+                console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + ' nsd-control reload exec error: ' + error);
             }
         });
-
+    }
 
     console.log(result);
     res.end(result);
@@ -123,20 +124,15 @@ function process_domain(dyndns2_obj, domain) {
     var record_type = "a";
     // but if ipv6 detected, then ipv6 AAAA records need changing
     if (dyndns2_obj.myip.indexOf(":") > -1) { record_type = "aaaa"; }
-    //console.log("Is ipv6? : " + is_ipv6 + " IP: " + myip);
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Is ipv6? : " + is_ipv6 + " IP: " + myip);
 
     // read zone file to change into zone object
     var text = fs.readFileSync(zonefile_to_change, 'utf8');
     var zone_obj = zonefile.parse(text);
-    console.log(JSON.stringify(zone_obj[record_type]));
-
-    // in case we're going to modify the zonefile, let's get the new serial
-    var new_serial = get_serial(zone_obj);
-    console.log("Old serial is " + zone_obj.soa.serial);
-    console.log("New serial is " + new_serial);
+    //console.log(JSON.stringify(zone_obj[record_type]));
 
     // assume no change, we'll flip this if we do make changes
-    var no_change = true;
+    var change = false;
 
     if ( action_to_take == "update" ) {
         // loop through hosts
@@ -145,11 +141,15 @@ function process_domain(dyndns2_obj, domain) {
             var record_found = false;
             zone_obj[record_type].forEach(function identify_record(record) {
                 if (record.name == host) {
-                    console.log(record);
+                    console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Found: " + JSON.stringify(record));
                     record_found = true;
                     if (record.ip !== dyndns2_obj.myip) {
                         record.ip = dyndns2_obj.myip;
-                        no_change = false;
+                        change = true;
+                        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Modified to: " + JSON.stringify(record));
+                    }
+                    if (record_found && !change) {
+                        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Nothing modified for: " + JSON.stringify(record))
                     }
                 }
             });
@@ -157,8 +157,10 @@ function process_domain(dyndns2_obj, domain) {
                 var record = {};
                 record.name = host;
                 record.ip = dyndns2_obj.myip;
-                zone_obj[record_type].push(record)
-                no_change = false;
+                record.ttl = process.env.DYNDNS_DEFAULT_DYN_TTL;
+                zone_obj[record_type].push(record);
+                change = true;
+                console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Record not found. Added record: " + JSON.stringify(record));
             }
         });
     } else if ( action_to_take == "delete" ) {
@@ -167,35 +169,30 @@ function process_domain(dyndns2_obj, domain) {
             var record_found = false;
             zone_obj[record_type].forEach(function identify_record(record, index) {
                 if (record.name == host) {
-                    console.log(record);
+                    console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Found: " + JSON.stringify(record));
                     record_found = true;
-                    zone_obj[record_type].splice(index, 1);
-                    no_change = false;
+                    var removed_record = zone_obj[record_type].splice(index, 1);
+                    change = true;
+                    console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Deleted: " + JSON.stringify(removed_record))
                 }
             });
         });
     }
 
-    if (!no_change) {
+    if (change) {
+    // in case we're going to modify the zonefile, let's get the new serial
+        var new_serial = get_serial(zone_obj);
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Old serial is " + zone_obj.soa.serial +
+                                                          ", New serial is " + new_serial);
         zone_obj.soa.serial = new_serial;
+        fs.writeFileSync(zonefile_to_change, zonefile.generate(zone_obj));
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Changes written to: " + zonefile_to_change);
     }
 
-    console.log("After change, zone_obj is " + JSON.stringify(zone_obj));
+    // console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " After change, zone_obj is " + JSON.stringify(zone_obj));
 
-    /*
-        STILL NEED TODO
-        write file to disk with changed serial (confirm for both delete & update)
-        return bad/good/nochg depending
-        */
-
-//    var text = fs.readFileSync(zonefile_to_change, 'utf8');
-//    var zone_obj = zonefile.parse(text);
-//    console.log(JSON.stringify(zone_obj[record_type]));
-    fs.writeFileSync(zonefile_to_change, zonefile.generate(zone_obj));
-
-    // TODO return "bad" "good" or "nochg" depending
-    if (no_change) { return "nochg"; }
-    else return "good";
+    if (change) { return "good"; }
+    else return "nochg";
 }
 
 
@@ -221,7 +218,7 @@ function get_zone_file_to_change(domain) {
         var files_list = [];
         files_list = getAllFilesFromFolder(zonefile_location);
         if (files_list.length < 1) {
-            console.log("No files exist! No modifications can be made.");
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " No files exist! No modifications can be made.");
             return "";
         }
 
@@ -233,7 +230,7 @@ function get_zone_file_to_change(domain) {
             }
         });
         if (candidates.length < 1) {
-            console.log("No candidate file for " + domain + " found, no changes can be made.");
+            console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " No candidate file for " + domain + " found, no changes can be made.");
             return "";
         }
 
@@ -245,14 +242,14 @@ function get_zone_file_to_change(domain) {
 function get_serial(zone_obj) {
     var old_serial = zone_obj.soa.serial;
     var old_serial_date = Math.floor(old_serial / 100);
-    var d = new Date();
-    var new_date_year = d.getFullYear().toString();
-    var new_date_mo = (d.getMonth()+1).toString();
-        if (new_date_mo.length == 1) { new_date_mo = "0" + new_date_mo }
-    var new_date_day = d.getDate().toString();
-        if (new_date_day.length == 1) { new_date_day = "0" + new_date_day }
-    var new_serial_date = parseInt(new_date_year + new_date_mo + new_date_day);
-    //console.log("Serial is " + old_serial_date + " and new date is " + new_serial_date);
+    // var new_date_year = d.getFullYear().toString();
+    // var new_date_mo = (d.getMonth()+1).toString();
+    //     if (new_date_mo.length == 1) { new_date_mo = "0" + new_date_mo }
+    // var new_date_day = d.getDate().toString();
+    //     if (new_date_day.length == 1) { new_date_day = "0" + new_date_day }
+    // var new_serial_date = parseInt(new_date_year + new_date_mo + new_date_day);
+    var new_serial_date = m().format('YYYYMMDD');
+    //console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Serial is " + old_serial_date + " and new date is " + new_serial_date);
     if (old_serial_date >= new_serial_date) {
         var new_serial = old_serial + 2;
     } else {
@@ -278,7 +275,7 @@ function get_hosts_to_update(dyndns2_obj, req, res) {
     // check there are fewer than 20 hosts provided, as per API
     // and also report 'bad' if we found any hostname invalid
     if (hosts_arr.length > 20 || !hostname_ok) {
-        console.log("Invalid hostname in query.");
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Invalid hostname in query.");
         res.end("bad");
         return false;
     }
@@ -312,7 +309,7 @@ function get_action_to_take(dyndns2_obj, req, res) {
     } else if (req_path.indexOf("delete") !== -1) {
         dyndns2_obj.action_to_take = "delete";
     } else {
-        console.log("Well, something went wrong...");
+        console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " Well, something went wrong...");
         res.end("bad");
         return false;
     }
