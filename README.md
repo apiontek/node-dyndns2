@@ -36,3 +36,26 @@ In other words, if you send a query to update "some.sub.host.at.my.custom.org" t
 
 This app makes no changes to the TTL already set for existing hosts. But if you send an update request for a host not found in the zone, it'll add that host, and set a TTL. The app uses a default TTL of "300," but you can override that by setting a value for DYNDNS_DEFAULT_DYN_TTL.
 
+## Running as a service
+
+I'm using systemd, as in the below example. Make sure the service user has permission to write to the logfile and zone files.
+
+```
+[Unit]
+Description=node-dyndns2 DNS updater
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/node-dyndns2
+User=nsd
+Group=nsd
+Restart=always
+RestartSec=10
+EnvironmentFile=/opt/node-dyndns2/dd.env
+ExecStart=/bin/bash -c 'exec /usr/bin/node /opt/node-dyndns2/app.js &>> /var/log/node-dyndns2.log'
+
+[Install]
+WantedBy=multi-user.target
+```
