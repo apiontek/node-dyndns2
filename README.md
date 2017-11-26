@@ -16,7 +16,7 @@ You'll need to set three environment variables for the app (which can be done wi
 
 DYNDNS_AUTH_TOKEN_BCRYPT_HASH="bcrypthashofyoursupersecretpasswordtoken"
 DYNDNS_ZONEFILE_LOCATION="/place/where/your/zone/files/are"
-DYNDNS_DEFAULT_DYN_TTL="300" // or whatever
+DYNDNS_DEFAULT_DYN_TTL="1799"           // or whatever
 
 ### DYNDNS_AUTH_TOKEN_BCRYPT_HASH
 
