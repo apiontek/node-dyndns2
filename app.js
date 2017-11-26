@@ -34,7 +34,7 @@ if (!process.env.DYNDNS_ZONEFILE_LOCATION) {
 if (!process.env.DYNDNS_AUTH_TOKEN_BCRYPT_HASH) {
     console.log(m().format('YYYY-MM-DD hh:mm:ss Z') + " ERROR: No auth token hash provided. Please set DYNDNS_AUTH_TOKEN_BCRYPT_HASH to a bcrypt hash of your auth password/token.")
 } else {
-    var token_hash = proces.env.DYNDNS_AUTH_TOKEN_BCRYPT_HASH;
+    var token_hash = process.env.DYNDNS_AUTH_TOKEN_BCRYPT_HASH;
 }
 
 // import the dyndns logic
