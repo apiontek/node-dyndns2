@@ -2,6 +2,10 @@
   "name": "node-dyndns2",
   "version": "1.0.0",
   "description": "Minimal dyndns2 api server in node that can modify zone files on disk.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apiontek/node-dyndns2"
+  },
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
